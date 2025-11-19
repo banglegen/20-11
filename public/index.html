@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>20/11 Flip Cards & Tin Nhắn Chúc Mừng</title>
+<style>
+    body {
+        margin: 0;
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #ffe5f0, #e0c8ff);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #7b2ee6;
+        text-shadow: 0 0 10px #fff;
+        margin-bottom: 20px;
+    }
+
+    /* Flip Card */
+    .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 40px;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .card-container {
+        perspective: 1000px;
+        width: 200px;
+        height: 150px;
+    }
+
+    .card {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.8s;
+        cursor: pointer;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .card.flip {
+        transform: rotateY(180deg);
+    }
+
+    .card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 15px;
+        font-size: 16px;
+        color: #fff;
+    }
+
+    .front {
+        background: #7b2ee6;
+    }
+
+    .back {
+        transform: rotateY(180deg);
+        background: #fff;
+    }
+
+    .back img {
+        width: 100%;
+        height: 100%;
+        border-radius: 15px;
+        object-fit: cover;
+    }
+
+    /* Lời chúc input */
+    #wishBox {
+        width: 90%;
+        max-width: 500px;
+        background: rgba(255,255,255,0.9);
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    #wishBox input, #wishBox textarea {
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    #wishBox button {
+        background: #7b2ee6;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #wishes {
+        width: 90%;
+        max-width: 500px;
+        margin-bottom: 50px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .wish {
+        background: #fff;
+        padding: 12px 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        font-size: 16px;
+    }
+</style>
+</head>
+<body>
+<h1>💜 Chúc Mừng 20/11 💜</h1>
+
+<!-- Multiple Flip Cards -->
+<div class="cards-container" id="cardsContainer"></div>
+
+<!-- Nhập lời chúc -->
+<div id="wishBox">
+    <h3>Gửi lời chúc của bạn 💌</h3>
+    <input type="text" id="name" placeholder="Tên bạn">
+    <textarea id="message" placeholder="Nhập lời chúc"></textarea>
+    <button onclick="addWish()">Gửi lời chúc</button>
+</div>
+
+<!-- Danh sách lời chúc -->
+<div id="wishes"></div>
+
+<script>
+    const cardData = [
+        { front: 'Nhấn để xem ảnh thầy/cô 🎁', backImg: 'anh1.jpg' },
+        { front: 'Chúc thầy/cô mạnh khỏe ❤️', backImg: 'anh2.jpg' },
+        { front: 'Cảm ơn thầy/cô đã dạy dỗ 📚', backImg: 'anh3.jpg' },
+        { front: 'Cảm ơn thầy/cô đã dạy dỗ 📚', backImg: 'anh4.jpg' },
+        { front: 'Nhấn để xem ảnh thầy/cô 🎁', backImg: 'anh5.jpg' },
+        { front: 'Chúc thầy/cô mạnh khỏe ❤️', backImg: 'anh6.jpg' },
+        { front: 'Cảm ơn thầy/cô đã dạy dỗ 📚', backImg: 'anh7.jpg' },
+        { front: 'Chúc thầy/cô mạnh khỏe ❤️', backImg: 'anh8.jpg' },
+        { front: 'Cảm ơn thầy/cô đã dạy dỗ 📚', backImg: 'anh9.jpg' },
+        { front: 'Cảm ơn thầy/cô đã dạy dỗ 📚', backImg: 'anh10.jpg' },
+        { front: 'Nhấn để xem ảnh thầy/cô 🎁', backImg: 'anh11.jpg' },
+        { front: 'Chúc thầy/cô mạnh khỏe ❤️', backImg: 'anh12.jpg' }
+    ];
+
+    const cardsContainer = document.getElementById('cardsContainer');
+
+    cardData.forEach(cData => {
+        const container = document.createElement('div');
+        container.className = 'card-container';
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = () => card.classList.toggle('flip');
+        card.innerHTML = `
+            <div class='card-face front'>${cData.front}</div>
+            <div class='card-face back'><img src='${cData.backImg}' alt='Thầy/Cô'></div>
+        `;
+        container.appendChild(card);
+        cardsContainer.appendChild(container);
+    });
+
+    async function fetchWishes(){
+        const res = await fetch('/messages');
+        const data = await res.json();
+        renderWishes(data);
+    }
+
+    async function addWish(){
+        const name = document.getElementById('name').value.trim();
+        const msg = document.getElementById('message').value.trim();
+        if(!name || !msg) return;
+        await fetch('/send', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({name, message: msg})
+        });
+        document.getElementById('name').value='';
+        document.getElementById('message').value='';
+        fetchWishes();
+    }
+
+    function renderWishes(wishes){
+        const container = document.getElementById('wishes');
+        container.innerHTML = '';
+        wishes.forEach(w => {
+            const div = document.createElement('div');
+            div.className = 'wish';
+            div.textContent = `${w.name}: ${w.message}`;
+            container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+    }
+
+    setInterval(fetchWishes, 3000);
+    fetchWishes();
+</script>
+</body>
+</html>
