@@ -55,7 +55,7 @@
         transform: rotateY(180deg);
     }
 
-   .card-face {
+    .card-face {
         position: absolute;
         width: 100%;
         height: 100%;
@@ -137,7 +137,7 @@
         font-size: 16px;
     }
 
-    /* 🌸 HIỆU ỨNG MƯA HOA */
+    /* 🌸 Mưa hoa */
     .flower {
         position: fixed;
         top: -50px;
@@ -158,10 +158,8 @@
 
 <h1>💜 Chúc Mừng 20/11 💜</h1>
 
-<!-- Multiple Flip Cards -->
 <div class="cards-container" id="cardsContainer"></div>
 
-<!-- Nhập lời chúc -->
 <div id="wishBox">
     <h3>Gửi lời chúc của bạn 💌</h3>
     <input type="text" id="name" placeholder="Tên bạn">
@@ -169,11 +167,15 @@
     <button onclick="addWish()">Gửi lời chúc</button>
 </div>
 
-<!-- Danh sách lời chúc -->
 <div id="wishes"></div>
 
+<!-- Nhạc nền -->
+<audio id="bgMusic" loop>
+    <source src="nhac.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-    /* DỮ LIỆU THẺ */
+    // Dữ liệu thẻ
     const cardData = [
         { front: 'Chúc thầy 20/11 luôn vui, khỏe, hạnh phúc! 🌹', backImg: 'anh1.jpg' },
         { front: 'Cảm ơn thầy vì tất cả! 💛', backImg: 'anh2.jpg' },
@@ -190,14 +192,23 @@
     ];
 
     const cardsContainer = document.getElementById('cardsContainer');
+    let musicPlayed = false;
 
-    cardData.forEach(cData => {
+    cardData.forEach((cData, index) => {
         const container = document.createElement('div');
         container.className = 'card-container';
 
         const card = document.createElement('div');
         card.className = 'card';
-        card.onclick = () => card.classList.toggle('flip');
+
+        card.onclick = () => {
+            card.classList.toggle('flip');
+            // Mở card lần đầu → bật nhạc
+            if(!musicPlayed){
+                document.getElementById('bgMusic').play();
+                musicPlayed = true;
+            }
+        };
 
         card.innerHTML = `
             <div class='card-face front'>${cData.front}</div>
@@ -208,7 +219,7 @@
         cardsContainer.appendChild(container);
     });
 
-    /* API */
+    // Tin nhắn
     async function fetchWishes(){
         const res = await fetch('/messages');
         const data = await res.json();
@@ -233,7 +244,6 @@
         const container = document.getElementById('wishes');
         const oldScroll = container.scrollTop;
         container.innerHTML = '';
-
         wishes.forEach(w => {
             const div = document.createElement('div');
             div.className = 'wish';
@@ -246,23 +256,18 @@
     setInterval(fetchWishes, 3000);
     fetchWishes();
 
-    /* 🌸 MƯA HOA */
+    // Mưa hoa
     const flowers = ["🌸","💮","🌼","🌺","🌷"];
-
     function createFlower() {
         const f = document.createElement("div");
         f.className = "flower";
         f.innerText = flowers[Math.floor(Math.random()*flowers.length)];
-
         f.style.left = Math.random() * window.innerWidth + "px";
         f.style.fontSize = (20 + Math.random()*20) + "px";
         f.style.animationDuration = (4 + Math.random()*6) + "s";
-
         document.body.appendChild(f);
-
         setTimeout(() => f.remove(), 9000);
     }
-
     setInterval(createFlower, 300);
 </script>
 
