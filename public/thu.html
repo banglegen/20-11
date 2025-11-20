@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trang Thư</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #ffe5f0, #e0c8ff);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+}
+h1 { 
+    text-align: center; 
+    color:#7b2ee6; 
+    text-shadow:0 0 10px #fff; 
+    margin-bottom:20px;
+    position: relative;
+    z-index: 1;
+}
+#letterBox {
+    width:90%; max-width:500px; 
+    background:rgba(255,255,255,0.9);
+    border-radius:15px; padding:20px; 
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+    margin-bottom:20px;
+    position: relative;
+    z-index: 1;
+}
+#letterBox input, #letterBox textarea {
+    width:100%; margin:10px 0; padding:10px; 
+    border-radius:10px; border:1px solid #ccc; font-size:16px;
+}
+#letterBox button {
+    background:#7b2ee6; color:white; padding:10px 20px; 
+    border:none; border-radius:10px; cursor:pointer; font-size:16px; margin-right:10px;
+}
+#letters {
+    width:90%; max-width:500px; display:flex; flex-direction:column; gap:10px; 
+    max-height:400px; overflow-y:auto;
+    position: relative;
+    z-index: 1;
+}
+.letter {
+    background:#fff; padding:12px 15px; border-radius:12px; 
+    box-shadow:0 4px 10px rgba(0,0,0,0.1); font-size:16px; 
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+/* Mưa hoa toàn màn hình, không che chữ */
+.flower {
+    position: fixed; top: -50px; font-size:22px; pointer-events:none; 
+    animation: fall linear infinite; opacity:0.8; z-index:0;
+}
+@keyframes fall {0%{transform:translateY(-50px) rotate(0deg);}100%{transform:translateY(110vh) rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<h1>💌 Thư 💌</h1>
+
+<div id="letterBox">
+    <h3>Viết thư mới ✍️</h3>
+    <input type="text" id="sender" placeholder="Tên bạn">
+    <textarea id="letterMessage" placeholder="Nhập nội dung thư"></textarea>
+    <div style="margin-top:10px;">
+        <button onclick="addLetter()">Gửi thư</button>
+        <button onclick="goBack()">Quay về trang chính</button>
+    </div>
+</div>
+
+<div id="letters"></div>
+
+<script>
+const lettersContainer = document.getElementById('letters');
+
+// Fetch và render tất cả thư
+async function fetchLetters(){
+    const res = await fetch('/letters');
+    const data = await res.json();
+    lettersContainer.innerHTML = '';
+    data.forEach(l => {
+        const div = document.createElement('div');
+        div.className = 'letter';
+        div.textContent = `${l.sender}: ${l.message}`;
+        lettersContainer.appendChild(div);
+    });
+}
+
+// Gửi thư mới
+async function addLetter(){
+    const sender = document.getElementById('sender').value.trim();
+    const message = document.getElementById('letterMessage').value.trim();
+    if(!sender || !message) return;
+
+    await fetch('/sendLetter', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({sender,message})
+    });
+
+    document.getElementById('sender').value='';
+    document.getElementById('letterMessage').value='';
+    fetchLetters();
+}
+
+// Quay về index
+function goBack(){ window.location.href='index.html'; }
+
+fetchLetters();
+setInterval(fetchLetters, 3000);
+
+// Mưa hoa toàn màn hình
+const flowers = ["🌸","💮","🌼","🌺","🌷"];
+function createFlower() {
+    const f = document.createElement("div");
+    f.className = "flower";
+    f.innerText = flowers[Math.floor(Math.random()*flowers.length)];
+    f.style.left = Math.random()*window.innerWidth+"px";
+    f.style.fontSize = (20+Math.random()*20)+"px";
+    f.style.animationDuration = (4+Math.random()*6)+"s";
+    document.body.appendChild(f);
+    setTimeout(()=>f.remove(),9000);
+}
+setInterval(createFlower,300);
+</script>
+
+</body>
+</html>
